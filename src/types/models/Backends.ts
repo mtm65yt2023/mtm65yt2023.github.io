@@ -4,6 +4,7 @@ export enum BackendType {
 	NoOp,
 	PublicLobby,
 	Impostor,
+	CustomServer,
 }
 
 export interface BackendModel {
@@ -16,7 +17,7 @@ export interface PublicLobbyBackendModel extends BackendModel {
 	region: PublicLobbyRegion;
 }
 
-export interface ImpostorBackendModel extends BackendModel {
+export interface CustomServerBackendModel extends BackendModel {
 	backendType: BackendType.Impostor;
 	ip: string;
 }
