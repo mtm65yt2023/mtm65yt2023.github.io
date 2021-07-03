@@ -1,11 +1,11 @@
 import { Socket } from "socket.io";
 
-import { Color } from "@skeldjs/constant";
+import { Color, Hat, Skin } from "@skeldjs/constant";
 
 import {
 	BackendModel,
 	BackendType,
-	ImpostorBackendModel,
+	CustomServerBackendModel,
 	PublicLobbyBackendModel,
 } from "./types/models/Backends";
 
@@ -27,10 +27,13 @@ export interface PlayerPose {
 }
 
 export interface PlayerModel {
-	name: string;
+	clientId: number;
 	position: PlayerPose;
-	color: Color;
 	flags: Set<PlayerFlag>;
+	name: string;
+	color: Color;
+	hat: Hat;
+	skin: Skin;
 	ventid: number;
 }
 
@@ -40,6 +43,7 @@ export default class Client implements ClientBase {
 
 	public readonly uuid: string;
 
+	public clientId: number;
 	public name: string;
 
 	private connected_at: number;
@@ -47,6 +51,7 @@ export default class Client implements ClientBase {
 	constructor(socket: Socket, uuid: string) {
 		this.socket = socket;
 		this.uuid = uuid;
+		this.clientId = 0;
 		this.name = "";
 		this.connected_at = 0;
 
@@ -57,7 +62,7 @@ export default class Client implements ClientBase {
 				if (
 					this.room &&
 					this.room.clients &&
-					this.name === this.room.hostname
+					this.clientId === this.room.hostclientId
 				) {
 					const client = this.room.clients.find(
 						(member) => member.uuid === payload.uuid
@@ -94,7 +99,7 @@ export default class Client implements ClientBase {
 		this.socket.on(
 			ClientSocketEvents.SetOptions,
 			async (payload: { options: HostOptions }) => {
-				if (this.room && this.name === this.room.hostname) {
+				if (this.room && this.clientId === this.room.hostclientId) {
 					await this.room.setOptions(payload.options);
 				}
 			}
@@ -127,8 +132,8 @@ export default class Client implements ClientBase {
 				backendModel.backendType === BackendType.Impostor
 			) {
 				return (
-					(room.backendModel as ImpostorBackendModel).ip ===
-					(backendModel as ImpostorBackendModel).ip
+					(room.backendModel as CustomServerBackendModel).ip ===
+					(backendModel as CustomServerBackendModel).ip
 				);
 			} else if (
 				room.backendModel.backendType === BackendType.PublicLobby &&
@@ -202,12 +207,24 @@ export default class Client implements ClientBase {
 		this.socket.emit(ClientSocketEvents.SetVentOf, { uuid, ventid });
 	}
 
+	setNameOf(uuid: string, name: string): void {
+		this.socket.emit(ClientSocketEvents.SetNameOf, { uuid, name });
+	}
+
 	setColorOf(uuid: string, color: Color): void {
 		this.socket.emit(ClientSocketEvents.SetColorOf, { uuid, color });
 	}
 
-	setHost(name: string): void {
-		this.socket.emit(ClientSocketEvents.SetHost, { name });
+	setHatOf(uuid: string, hat: Hat): void {
+		this.socket.emit(ClientSocketEvents.SetHatOf, { uuid, hat });
+	}
+
+	setSkinOf(uuid: string, skin: Skin): void {
+		this.socket.emit(ClientSocketEvents.SetSkinOf, { uuid, skin });
+	}
+
+	setHost(uuid: string): void {
+		this.socket.emit(ClientSocketEvents.SetHost, { uuid });
 	}
 
 	setOptions(options: HostOptions): void {

@@ -12,13 +12,7 @@
 						<i v-if="stream && stream.levels > 10" class="fas fa-volume-up"></i>
 						<i v-else class="fas fa-volume-off"></i>
 						<span class="pl-3">{{ client.name.trim() }}</span>
-						<span
-							v-if="
-								$store.state.host &&
-								$store.state.host.toLowerCase().trim() ===
-									client.name.toLowerCase().trim()
-							"
-						>
+						<span v-if="$store.state.host && $store.state.host === client.uuid">
 							(HOST)
 						</span>
 					</span>

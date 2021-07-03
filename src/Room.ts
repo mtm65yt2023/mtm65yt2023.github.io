@@ -1,4 +1,4 @@
-import { Color, GameMap } from "@skeldjs/constant";
+import { Color, GameMap, Hat, Skin } from "@skeldjs/constant";
 
 import { BackendEvent } from "./types/enums/BackendEvents";
 
@@ -7,7 +7,7 @@ import { GameSettings, HostOptions } from "./types/models/ClientOptions";
 import {
 	BackendType,
 	BackendModel,
-	ImpostorBackendModel,
+	CustomServerBackendModel,
 	PublicLobbyBackendModel,
 } from "./types/models/Backends";
 
@@ -34,18 +34,18 @@ export default class Room {
 	public bans: Set<string> = new Set();
 
 	map: GameMap;
-	hostname: string;
+	hostclientId: number;
 	flags: Set<GameFlag>;
 	state: GameState;
 	options: HostOptions;
 	settings: GameSettings;
-	players: Map<string, PlayerModel>;
+	players: Map<number, PlayerModel>;
 
 	constructor(backendModel: BackendModel) {
 		this.backendModel = backendModel;
 		this.backendAdapter = Room.buildBackendAdapter(backendModel);
 
-		this.flags = new Set;
+		this.flags = new Set();
 		this.state = GameState.Lobby;
 
 		this.options = {
@@ -62,7 +62,7 @@ export default class Room {
 			map: GameMap.TheSkeld,
 		};
 
-		this.players = new Map;
+		this.players = new Map();
 
 		this.initializeBackend();
 	}
@@ -73,7 +73,7 @@ export default class Room {
 		if (backendModel.backendType === BackendType.PublicLobby) {
 			return new PublicLobbyBackend(backendModel as PublicLobbyBackendModel);
 		} else if (backendModel.backendType === BackendType.Impostor) {
-			return new ImpostorBackend(backendModel as ImpostorBackendModel);
+			return new ImpostorBackend(backendModel as CustomServerBackendModel);
 		} else {
 			return new NoOpBackend();
 		}
@@ -82,8 +82,8 @@ export default class Room {
 	private initializeBackend() {
 		this.backendAdapter.on(
 			BackendEvent.PlayerPose,
-			(payload: { name: string; position: PlayerPose; ventid: number }) => {
-				const client = this.getClientByName(payload.name);
+			(payload: { clientId: number; position: PlayerPose; ventid: number }) => {
+				const client = this.getClientByClientId(payload.clientId);
 
 				if (client) {
 					this.clients.forEach((c) => {
@@ -95,9 +95,9 @@ export default class Room {
 
 		this.backendAdapter.on(
 			BackendEvent.PlayerVent,
-			(payload: { name: string; ventid: number }) => {
-				const client = this.getClientByName(payload.name);
-				const player = this.getPlayerByName(payload.name);
+			(payload: { clientId: number; ventid: number }) => {
+				const client = this.getClientByClientId(payload.clientId);
+				const player = this.getPlayerByClientId(payload.clientId);
 
 				player.ventid = payload.ventid;
 
@@ -110,10 +110,26 @@ export default class Room {
 		);
 
 		this.backendAdapter.on(
-			BackendEvent.PlayerColor,
-			(payload: { name: string; color: Color }) => {
+			BackendEvent.PlayerName,
+			(payload: { clientId: number; name: string }) => {
 				const client = this.getClientByName(payload.name);
-				const player = this.getPlayerByName(payload.name);
+				const player = this.getPlayerByClientId(payload.clientId);
+
+				player.name = payload.name;
+
+				if (client) {
+					if (!client.clientId) {
+						client.clientId = payload.clientId;
+					}
+				}
+			}
+		);
+
+		this.backendAdapter.on(
+			BackendEvent.PlayerColor,
+			(payload: { clientId: number; color: Color }) => {
+				const client = this.getClientByClientId(payload.clientId);
+				const player = this.getPlayerByClientId(payload.clientId);
 
 				player.color = payload.color;
 
@@ -126,13 +142,48 @@ export default class Room {
 		);
 
 		this.backendAdapter.on(
-			BackendEvent.HostChange,
-			async (payload: { name: string }) => {
-				this.hostname = payload.name;
+			BackendEvent.PlayerHat,
+			(payload: { clientId: number; hat: Hat }) => {
+				const client = this.getClientByClientId(payload.clientId);
+				const player = this.getPlayerByClientId(payload.clientId);
 
-				this.clients.forEach((c) => {
-					c.setHost(this.hostname);
-				});
+				player.hat = payload.hat;
+
+				if (client) {
+					this.clients.forEach((c) => {
+						c.setHatOf(client.uuid, payload.hat);
+					});
+				}
+			}
+		);
+
+		this.backendAdapter.on(
+			BackendEvent.PlayerSkin,
+			(payload: { clientId: number; skin: Skin }) => {
+				const client = this.getClientByClientId(payload.clientId);
+				const player = this.getPlayerByClientId(payload.clientId);
+
+				player.skin = payload.skin;
+
+				if (client) {
+					this.clients.forEach((c) => {
+						c.setSkinOf(client.uuid, payload.skin);
+					});
+				}
+			}
+		);
+
+		this.backendAdapter.on(
+			BackendEvent.HostChange,
+			async (payload: { clientId: number }) => {
+				const client = this.getClientByClientId(payload.clientId);
+				this.hostclientId = payload.clientId;
+
+				if (client) {
+					this.clients.forEach((c) => {
+						c.setHost(client.uuid);
+					});
+				}
 			}
 		);
 
@@ -149,8 +200,8 @@ export default class Room {
 
 				this.clients.forEach((c) => {
 					c.setGameState(this.state);
-					for (const [name, player] of this.players) {
-						const client = this.getClientByName(name);
+					for (const [clientId, player] of this.players) {
+						const client = this.getClientByClientId(clientId);
 						if (client) {
 							c.setFlagsOf(client.uuid, player.flags);
 						}
@@ -172,9 +223,9 @@ export default class Room {
 
 		this.backendAdapter.on(
 			BackendEvent.PlayerFlags,
-			async (payload: { name: string; flag: PlayerFlag; set: boolean }) => {
-				const client = this.getClientByName(payload.name);
-				const player = this.getPlayerByName(payload.name);
+			async (payload: { clientId: number; flag: PlayerFlag; set: boolean }) => {
+				const client = this.getClientByClientId(payload.clientId);
+				const player = this.getPlayerByClientId(payload.clientId);
 
 				if (payload.set) {
 					player.flags.add(payload.flag);
@@ -219,30 +270,46 @@ export default class Room {
 		this.backendAdapter.initialize();
 	}
 
-	getPlayerByName(name: string): PlayerModel {
-		const found = this.players.get(name.toLowerCase().trim());
+	getPlayerByClientId(clientId: number): PlayerModel {
+		const found = this.players.get(clientId);
 
 		if (found) {
 			return found;
 		}
 
 		const player: PlayerModel = {
-			name,
+			clientId,
 			position: { x: 0, y: 0 },
+			flags: new Set(),
+			name: "",
 			color: -1,
-			flags: new Set,
+			hat: Hat.None,
+			skin: Skin.None,
 			ventid: -1,
 		};
 
-		this.players.set(name.toLowerCase().trim(), player);
+		this.players.set(clientId, player);
 		return player;
+	}
+
+	getPlayerByName(name: string): PlayerModel | undefined {
+		for (const [, player] of this.players) {
+			if (player.name === name) {
+				return player;
+			}
+		}
+
+		return undefined;
 	}
 
 	getClientByName(name: string): Client | undefined {
 		return this.clients.find(
-			(client) =>
-				client.name?.toLowerCase()?.trim() === name.toLowerCase().trim()
+			(client) => client.name.toLowerCase().trim() === name.toLowerCase().trim()
 		);
+	}
+
+	getClientByClientId(clientId: number): Client | undefined {
+		return this.clients.find((client) => client.clientId === clientId);
 	}
 
 	addClient(client: Client): void {
@@ -252,6 +319,10 @@ export default class Room {
 
 		const player = this.getPlayerByName(client.name);
 
+		if (player) {
+			client.clientId = player.clientId;
+		}
+
 		client.syncAllClients(
 			this.clients.map((c) => ({
 				uuid: c.uuid,
@@ -260,11 +331,25 @@ export default class Room {
 		);
 
 		this.clients.forEach((c) => {
-			c.addClient(client.uuid, player.name, player.position, player.flags, player.color);
-			c.setPoseOf(client.uuid, player.position);
-			c.setColorOf(client.uuid, player.color);
+			if (player) {
+				c.addClient(
+					client.uuid,
+					client.name,
+					player.position,
+					player.flags,
+					player.color
+				);
+				c.setPoseOf(client.uuid, player.position);
+				c.setColorOf(client.uuid, player.color);
+			} else {
+				c.addClient(client.uuid, client.name, { x: 0, y: 0 }, new Set(), 0);
+			}
 
-			const p = this.getPlayerByName(c.name);
+			if (this.hostclientId === client.clientId) {
+				client.setHost(client.uuid);
+			}
+
+			const p = this.getPlayerByClientId(c.clientId);
 			client.setColorOf(c.uuid, p.color);
 			client.setPoseOf(c.uuid, p.position);
 			client.setFlagsOf(c.uuid, p.flags);
@@ -272,13 +357,23 @@ export default class Room {
 
 		this.clients.push(client);
 
-		client.setPoseOf(client.uuid, player.position);
-		client.setColorOf(client.uuid, player.color);
+		if (player) {
+			client.setPoseOf(client.uuid, player.position);
+			client.setNameOf(client.uuid, player.name);
+			client.setColorOf(client.uuid, player.color);
+			client.setHatOf(client.uuid, player.hat);
+			client.setSkinOf(client.uuid, player.skin);
+		}
+
 		client.setGameState(this.state);
 		client.setGameFlags(this.flags);
 		client.setSettings(this.settings);
 
-		client.setHost(this.hostname);
+		const host = this.getClientByClientId(this.hostclientId);
+
+		if (host) {
+			client.setHost(host.uuid);
+		}
 
 		client.setOptions(this.options);
 	}
@@ -292,11 +387,12 @@ export default class Room {
 		if (this.clients.length === 0) await this.destroy();
 	}
 
-	setOptions(options: HostOptions, host = false): void {
+	setOptions(options: HostOptions, includeHost = false): void {
 		this.options = options;
 
 		this.clients.forEach((c) => {
-			if (c.name !== this.hostname || host) c.setOptions(options);
+			if (c.clientId !== this.hostclientId || includeHost)
+				c.setOptions(options);
 		});
 	}
 

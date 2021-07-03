@@ -1,4 +1,4 @@
-import { Color } from "@skeldjs/constant";
+import { Color, Hat, Skin } from "@skeldjs/constant";
 
 import { EventEmitter } from "events";
 import util from "util";
@@ -51,24 +51,36 @@ export abstract class BackendAdapter extends EventEmitter {
 		);
 	}
 
-	emitPlayerPose(name: string, position: PlayerPose): void {
-		this.emit(BackendEvent.PlayerPose, { name, position });
+	emitPlayerPose(clientId: number, position: PlayerPose): void {
+		this.emit(BackendEvent.PlayerPose, { clientId, position });
 	}
 
-	emitPlayerVent(name: string, ventid: number): void {
-		this.emit(BackendEvent.PlayerVent, { name, ventid });
+	emitPlayerVent(clientId: number, ventid: number): void {
+		this.emit(BackendEvent.PlayerVent, { clientId, ventid });
 	}
 
-	emitPlayerColor(name: string, color: Color): void {
-		this.emit(BackendEvent.PlayerColor, { name, color });
+	emitPlayerName(clientId: number, name: string): void {
+		this.emit(BackendEvent.PlayerName, { clientId, name });
 	}
 
-	emitPlayerFlags(name: string, flag: PlayerFlag, set: boolean): void {
-		this.emit(BackendEvent.PlayerFlags, { name, flag, set });
+	emitPlayerColor(clientId: number, color: Color): void {
+		this.emit(BackendEvent.PlayerColor, { clientId, color });
 	}
 
-	emitHostChange(name: string): void {
-		this.emit(BackendEvent.HostChange, { name });
+	emitPlayerHat(clientId: number, hat: Hat): void {
+		this.emit(BackendEvent.PlayerHat, { clientId, hat });
+	}
+
+	emitPlayerSkin(clientId: number, skin: Skin): void {
+		this.emit(BackendEvent.PlayerSkin, { clientId, skin });
+	}
+
+	emitPlayerFlags(clientId: number, flag: PlayerFlag, set: boolean): void {
+		this.emit(BackendEvent.PlayerFlags, { clientId, flag, set });
+	}
+
+	emitHostChange(clientId: number): void {
+		this.emit(BackendEvent.HostChange, { clientId });
 	}
 
 	emitGameState(state: GameState): void {

@@ -101,6 +101,16 @@ export default new Vuex.Store({
 				state.clients[index].ventid = payload.ventid;
 			}
 		},
+		setName(state: State, name: string) {
+			state.me.name = name;
+		},
+		setNameOf(state: State, payload: { uuid: string; name: string }) {
+			const index = state.clients.findIndex((c) => c.uuid === payload.uuid);
+
+			if (index !== -1) {
+				state.clients[index].name = payload.name;
+			}
+		},
 		setColor(state: State, color: ColorID) {
 			state.me.color = color;
 		},
@@ -232,6 +242,19 @@ export default new Vuex.Store({
 				commit("setVentOf", {
 					uuid: payload.uuid,
 					venstid: payload.ventid,
+				});
+			}
+		},
+		[`socket_${ClientSocketEvents.SetNameOf}`](
+			{ commit, state },
+			payload: { uuid: string; name: string }
+		) {
+			if (payload.uuid === state.me.uuid) {
+				commit("setName", payload.name);
+			} else {
+				commit("setNameOf", {
+					uuid: payload.uuid,
+					name: payload.name,
 				});
 			}
 		},

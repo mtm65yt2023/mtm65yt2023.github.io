@@ -332,7 +332,7 @@ export default class PublicLobbyBackend extends BackendAdapter {
 		if (this.client.host && this.client.host.info) {
 			this.log(LogMode.Success, "Found host: " + fmtName(this.client.host));
 
-			this.emitHostChange(this.client.host.info.name);
+			this.emitHostChange(this.client.host.id);
 		}
 		return true;
 	}
@@ -427,7 +427,7 @@ export default class PublicLobbyBackend extends BackendAdapter {
 
 			this.client.on("player.move", (ev) => {
 				if (ev.player?.info) {
-					this.emitPlayerPose(ev.player.info.name, ev.position);
+					this.emitPlayerPose(ev.player.id, ev.position);
 				}
 			});
 
@@ -439,7 +439,7 @@ export default class PublicLobbyBackend extends BackendAdapter {
 						fmtName(ev.player),
 						"to x: " + ev.newPosition.x + " y: " + ev.newPosition.y
 					);
-					this.emitPlayerPose(ev.player.info.name, ev.newPosition);
+					this.emitPlayerPose(ev.player.id, ev.newPosition);
 				} else {
 					this.log(LogMode.Warn, "Got snapto, but there was no data.");
 				}
@@ -493,7 +493,7 @@ export default class PublicLobbyBackend extends BackendAdapter {
 
 				if (ev.player && ev.player.info) {
 					this.log(LogMode.Info, fmtName(ev.player), " is now the host.");
-					this.emitHostChange(ev.player.info.name);
+					this.emitHostChange(ev.player.id);
 				} else {
 					this.log(LogMode.Warn, "Host changed, but there was no data.");
 				}
@@ -571,6 +571,29 @@ export default class PublicLobbyBackend extends BackendAdapter {
 				}
 			});
 
+			this.client.on("player.setname", (ev) => {
+				if (ev.player?.info) {
+					this.log(
+						LogMode.Info,
+						fmtName(ev.player),
+						"set their name to " + ev.newName + "."
+					);
+					this.emitPlayerName(ev.player.id, ev.newName);
+				} else {
+					if (ev.player) {
+						this.log(
+							LogMode.Warn,
+							"Name was set for " + ev.player.id + ", but there was no data."
+						);
+					} else {
+						this.log(
+							LogMode.Warn,
+							"Name was set for a player, but there was no data."
+						);
+					}
+				}
+			});
+
 			this.client.on("player.setcolor", (ev) => {
 				if (ev.player?.info) {
 					this.log(
@@ -578,7 +601,7 @@ export default class PublicLobbyBackend extends BackendAdapter {
 						fmtName(ev.player),
 						"set their colour to " + skeldjs.Color[ev.newColor] + "."
 					);
-					this.emitPlayerColor(ev.player.info.name, ev.newColor);
+					this.emitPlayerColor(ev.player.id, ev.newColor);
 				} else {
 					if (ev.player) {
 						this.log(
@@ -589,6 +612,52 @@ export default class PublicLobbyBackend extends BackendAdapter {
 						this.log(
 							LogMode.Warn,
 							"Color was set for a player, but there was no data."
+						);
+					}
+				}
+			});
+
+			this.client.on("player.sethat", (ev) => {
+				if (ev.player?.info) {
+					this.log(
+						LogMode.Info,
+						fmtName(ev.player),
+						"set their hat to " + ev.newHat + "."
+					);
+					this.emitPlayerHat(ev.player.id, ev.newHat);
+				} else {
+					if (ev.player) {
+						this.log(
+							LogMode.Warn,
+							"Hat was set for " + ev.player.id + ", but there was no data."
+						);
+					} else {
+						this.log(
+							LogMode.Warn,
+							"Hat was set for a player, but there was no data."
+						);
+					}
+				}
+			});
+
+			this.client.on("player.setskin", (ev) => {
+				if (ev.player?.info) {
+					this.log(
+						LogMode.Info,
+						fmtName(ev.player),
+						"set their skin to " + ev.newSkin + "."
+					);
+					this.emitPlayerSkin(ev.player.id, ev.newSkin);
+				} else {
+					if (ev.player) {
+						this.log(
+							LogMode.Warn,
+							"Skin was set for " + ev.player.id + ", but there was no data."
+						);
+					} else {
+						this.log(
+							LogMode.Warn,
+							"Skin was set for a player, but there was no data."
 						);
 					}
 				}
@@ -622,7 +691,7 @@ export default class PublicLobbyBackend extends BackendAdapter {
 				this.log(LogMode.Info, "Meeting ended.");
 				if (ev.ejected) {
 					if (ev.ejected.info) {
-						this.emitPlayerFlags(ev.ejected.info.name, PlayerFlag.IsDead, true);
+						this.emitPlayerFlags(ev.ejected.id, PlayerFlag.IsDead, true);
 						this.log(LogMode.Log, fmtName(ev.ejected), "was voted off");
 					} else {
 						this.log(
@@ -645,7 +714,7 @@ export default class PublicLobbyBackend extends BackendAdapter {
 						"murdered",
 						fmtName(ev.victim) + "."
 					);
-					this.emitPlayerFlags(ev.victim.info.name, PlayerFlag.IsDead, true);
+					this.emitPlayerFlags(ev.victim.id, PlayerFlag.IsDead, true);
 				} else {
 					this.log(
 						LogMode.Warn,
@@ -661,7 +730,7 @@ export default class PublicLobbyBackend extends BackendAdapter {
 						fmtName(ev.player),
 						"entered vent " + this.getVentName(ev.ventid) + "."
 					);
-					this.emitPlayerVent(ev.player.info.name, ev.ventid);
+					this.emitPlayerVent(ev.player.id, ev.ventid);
 				} else {
 					this.log(
 						LogMode.Warn,
@@ -677,7 +746,7 @@ export default class PublicLobbyBackend extends BackendAdapter {
 						fmtName(ev.player),
 						"exited vent " + this.getVentName(ev.ventid) + "."
 					);
-					this.emitPlayerVent(ev.player.info.name, -1);
+					this.emitPlayerVent(ev.player.id, -1);
 				} else {
 					this.log(
 						LogMode.Warn,
@@ -691,7 +760,7 @@ export default class PublicLobbyBackend extends BackendAdapter {
 					const player = ev.impostors[i];
 					if (player?.info) {
 						this.log(LogMode.Info, fmtName(player), "was made impostor.");
-						this.emitPlayerFlags(player.info.name, PlayerFlag.IsImpostor, true);
+						this.emitPlayerFlags(player.id, PlayerFlag.IsImpostor, true);
 					} else {
 						this.log(
 							LogMode.Warn,
@@ -706,16 +775,18 @@ export default class PublicLobbyBackend extends BackendAdapter {
 
 				const player = this.client.getPlayerByPlayerId(ev.player.playerId);
 
-				if (ev.player) {
+				if (player) {
 					this.log(LogMode.Info, "Removed", fmtName(player, ev.player));
-					this.emitPlayerColor(ev.player.name, -1);
+					this.emitPlayerColor(player.id, -1);
+					this.emitPlayerHat(player.id, -1);
+					this.emitPlayerSkin(player.id, -1);
 				}
 			});
 
 			this.client.on("security.cameras.join", (ev) => {
 				if (ev.player?.info) {
 					this.log(LogMode.Info, fmtName(ev.player), "went onto cameras.");
-					this.emitPlayerFlags(ev.player.info.name, PlayerFlag.OnCams, true);
+					this.emitPlayerFlags(ev.player.id, PlayerFlag.OnCams, true);
 				} else {
 					this.log(
 						LogMode.Warn,
@@ -727,7 +798,7 @@ export default class PublicLobbyBackend extends BackendAdapter {
 			this.client.on("security.cameras.leave", (ev) => {
 				if (ev.player?.info) {
 					this.log(LogMode.Info, fmtName(ev.player), "went off cameras.");
-					this.emitPlayerFlags(ev.player.info.name, PlayerFlag.OnCams, false);
+					this.emitPlayerFlags(ev.player.id, PlayerFlag.OnCams, false);
 				} else {
 					this.log(
 						LogMode.Warn,
@@ -794,11 +865,6 @@ export default class PublicLobbyBackend extends BackendAdapter {
 
 				if (ev.component.classname === "GameData") {
 					gamedataSpawned = true;
-					const gamedata = (ev.component as unknown) as skeldjs.GameData;
-
-					for (const [, player] of gamedata.players) {
-						if (player.name) _this.emitPlayerColor(player.name, player.color);
-					}
 				} else if (ev.component.classname === "PlayerControl") {
 					playersSpawned.push(ev.component.ownerid);
 				}
@@ -911,6 +977,15 @@ export default class PublicLobbyBackend extends BackendAdapter {
 				);
 			return ConnectionErrorCode.TimedOut;
 		}
+		const gamedata = this.client.gamedata;
+		for (const [, playerInfo] of gamedata.players) {
+			if (playerInfo.name && playerInfo.player) {
+				this.emitPlayerName(playerInfo.player.id, playerInfo.name);
+				this.emitPlayerColor(playerInfo.player.id, playerInfo.color);
+				this.emitPlayerHat(playerInfo.player.id, playerInfo.hat);
+				this.emitPlayerSkin(playerInfo.player.id, playerInfo.skin);
+			}
+		}
 
 		if (!this.client) {
 			return ConnectionErrorCode.NoClient;
@@ -938,7 +1013,7 @@ export default class PublicLobbyBackend extends BackendAdapter {
 		this.log(LogMode.Info, "Map is on " + skeldjs.GameMap[settings.map]);
 
 		if (this.client.host && this.client.host.info) {
-			this.emitHostChange(this.client.host.info.name);
+			this.emitHostChange(this.client.host.id);
 		}
 
 		this.log(LogMode.Success, "Got spawns and settings.");
@@ -946,7 +1021,7 @@ export default class PublicLobbyBackend extends BackendAdapter {
 
 		for (const [, player] of this.client.players) {
 			if (player && player.info) {
-				this.emitPlayerColor(player.info.name, player.info.color);
+				this.emitPlayerColor(player.id, player.info.color);
 			}
 		}
 

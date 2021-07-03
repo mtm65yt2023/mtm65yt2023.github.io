@@ -1,23 +1,20 @@
 <template>
 	<v-list-group>
 		<template v-slot:activator>
-			<v-list-item-icon
-				:color="client.color > -1 ? Colors[client.color] : undefined"
-			>
-				<i class="far fa-user me"></i>
+			<v-list-item-icon>
+				<v-icon :color="client.color > -1 ? Colors[client.color] : undefined"
+					>fa-user</v-icon
+				>
 			</v-list-item-icon>
 			<v-list-item-content>
 				<v-list-item-title>
 					<span class="float-left">
 						<i v-if="mic.levels > 10" class="fas fa-volume-up"></i>
 						<i v-else class="fas fa-volume-off"></i>
-						<span class="pl-3">{{ client.name }}</span>
-						<span
-							v-if="
-								$store.state.host &&
-								$store.state.host.toLowerCase() === client.name.toLowerCase()
-							"
-						>
+						<span class="pl-3">{{
+							client.color > -1 ? Colors[client.color] : undefined
+						}}</span>
+						<span v-if="$store.state.host && $store.state.host === client.uuid">
 							(HOST)
 						</span>
 					</span>

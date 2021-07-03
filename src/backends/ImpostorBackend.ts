@@ -2,9 +2,9 @@ import { Vector2 } from "@skeldjs/util";
 import { HubConnection, HubConnectionBuilder } from "@microsoft/signalr";
 import _throttle from "lodash.throttle";
 
-import { ImpostorBackendModel } from "../types/models/Backends";
+import { CustomServerBackendModel } from "../types/models/Backends";
 
-import { IMPOSTOR_BACKEND_PORT } from "../consts";
+import { CUSTOM_SERVER_PORT } from "../consts";
 
 import { BackendAdapter, LogMode } from "./Backend";
 import { GameSettings } from "../types/models/ClientOptions";
@@ -13,27 +13,43 @@ import { PlayerFlag } from "../types/enums/PlayerFlags";
 import { GameFlag } from "../types/enums/GameFlags";
 
 export default class ImpostorBackend extends BackendAdapter {
-	backendModel: ImpostorBackendModel;
+	backendModel: CustomServerBackendModel;
 	connection!: HubConnection;
 
-	constructor(backendModel: ImpostorBackendModel) {
+	fakeClientIds: Map<string, number>;
+	lastFakeClientId: number;
+
+	constructor(backendModel: CustomServerBackendModel) {
 		super();
 
 		this.backendModel = backendModel;
-		this.gameID = this.backendModel.ip + ":" + IMPOSTOR_BACKEND_PORT;
+		this.gameID = this.backendModel.ip + ":" + CUSTOM_SERVER_PORT;
+
+		this.fakeClientIds = new Map();
+		this.lastFakeClientId = 0;
 	}
 
 	throttledEmitPlayerMove = _throttle(this.emitPlayerPose, 300);
 
+	getClientId(name: string): number {
+		const cached = this.fakeClientIds.get(name);
+		if (cached) return cached;
+
+		const clientId = ++this.lastFakeClientId;
+		this.fakeClientIds.set(name, clientId);
+		return clientId;
+	}
+
 	async initialize(): Promise<void> {
 		try {
 			this.connection = new HubConnectionBuilder()
-				.withUrl(`http://${this.backendModel.ip}:${IMPOSTOR_BACKEND_PORT}/hub`)
+				.withUrl(`http://${this.backendModel.ip}:${CUSTOM_SERVER_PORT}/hub`)
 				.build();
 
 			this.connection.on(ImpostorSocketEvents.HostChange, (name: string) => {
 				this.log(LogMode.Info, "Host changed to " + name + ".");
-				this.emitHostChange(name);
+				const clientId = this.getClientId(name);
+				this.emitHostChange(clientId);
 			});
 
 			this.connection.on(
@@ -50,7 +66,8 @@ export default class ImpostorBackend extends BackendAdapter {
 			this.connection.on(
 				ImpostorSocketEvents.PlayerMove,
 				(name: string, pose: Vector2) => {
-					this.throttledEmitPlayerMove(name, pose);
+					const clientId = this.getClientId(name);
+					this.throttledEmitPlayerMove(clientId, pose);
 				}
 			);
 
@@ -59,7 +76,8 @@ export default class ImpostorBackend extends BackendAdapter {
 			});
 
 			this.connection.on(ImpostorSocketEvents.PlayerExiled, (name: string) => {
-				this.emitPlayerFlags(name, PlayerFlag.IsDead, true);
+				const clientId = this.getClientId(name);
+				this.emitPlayerFlags(clientId, PlayerFlag.IsDead, true);
 			});
 
 			this.connection.on(ImpostorSocketEvents.CommsSabotage, (fix: boolean) => {
@@ -79,7 +97,7 @@ export default class ImpostorBackend extends BackendAdapter {
 
 			this.log(
 				LogMode.Info,
-				`Impostor Backend initialized at http://${this.backendModel.ip}:${IMPOSTOR_BACKEND_PORT}/hub`
+				`Impostor Backend initialized at http://${this.backendModel.ip}:${CUSTOM_SERVER_PORT}/hub`
 			);
 			try {
 				await this.connection.start();
