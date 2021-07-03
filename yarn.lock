@@ -145,84 +145,84 @@
     "@sentry/types" "6.8.0"
     tslib "^1.9.3"
 
-"@skeldjs/client@2.10.19", "@skeldjs/client@^2.10.19":
-  version "2.10.19"
-  resolved "https://registry.yarnpkg.com/@skeldjs/client/-/client-2.10.19.tgz#fd43b6427872bf202b64c5197e256aa92fa558b6"
-  integrity sha512-PEHJim3MkHfCFY5advlI2Mh+Z+tkikV3Hdo7dQx4K13w59H8Wyx+mYn7TXIo6zTWbZG9whxMCxqqud/srgP8HQ==
+"@skeldjs/client@2.10.22", "@skeldjs/client@^2.10.22":
+  version "2.10.22"
+  resolved "https://registry.yarnpkg.com/@skeldjs/client/-/client-2.10.22.tgz#faa3a13cde6813d64b716a007dba75e36c2758e4"
+  integrity sha512-xFsISeK0kZhirufJt5/g5SIAEgiXJTM+423FZPcBO5gSeLw1vNIELFHV9+e4KM0bZJSYadS0MI0+qAbWqmym+Q==
   dependencies:
-    "@skeldjs/constant" "2.10.19"
-    "@skeldjs/core" "2.10.19"
-    "@skeldjs/data" "2.10.19"
-    "@skeldjs/events" "2.10.19"
-    "@skeldjs/protocol" "2.10.19"
-    "@skeldjs/state" "2.10.19"
-    "@skeldjs/util" "2.10.19"
+    "@skeldjs/constant" "2.10.22"
+    "@skeldjs/core" "2.10.22"
+    "@skeldjs/data" "2.10.22"
+    "@skeldjs/events" "2.10.22"
+    "@skeldjs/protocol" "2.10.22"
+    "@skeldjs/state" "2.10.22"
+    "@skeldjs/util" "2.10.22"
 
-"@skeldjs/constant@2.10.19", "@skeldjs/constant@^2.10.19":
-  version "2.10.19"
-  resolved "https://registry.yarnpkg.com/@skeldjs/constant/-/constant-2.10.19.tgz#5f795761bf377386d6e7d48f801714a5d3d7c3be"
-  integrity sha512-zU55JplwdzdlxmIJx1/WgHi18/BQltpMjlF0/BMUOzowNEcpTHjR1axGgzHP2iBYUThW3dIQfNi9Xkj9pcMEWw==
+"@skeldjs/constant@2.10.22", "@skeldjs/constant@^2.10.22":
+  version "2.10.22"
+  resolved "https://registry.yarnpkg.com/@skeldjs/constant/-/constant-2.10.22.tgz#57f88131fc1973fcc5e85948575e03cb86373c8d"
+  integrity sha512-KQ/a27aeBRsx+ZX5ya99RaoRX2AxKXXTVCmZE7nz6AsWpTZ2wblNr2QtX1wFQWycDhOgB5Osi3RXeskMyrIR8g==
   dependencies:
-    "@skeldjs/util" "2.10.19"
+    "@skeldjs/util" "2.10.22"
 
-"@skeldjs/core@2.10.19", "@skeldjs/core@^2.10.19":
-  version "2.10.19"
-  resolved "https://registry.yarnpkg.com/@skeldjs/core/-/core-2.10.19.tgz#fa7e9599eb39a990e781ae9f0eac7cb8e660ebf8"
-  integrity sha512-NfPzZpE/U2yidA35IfFFN3oXkfny4tV0z8XgedyhP/SacRYbFsHAhI/OoTjdFPY0KzGRqSFvTERWDGDt74qt9A==
+"@skeldjs/core@2.10.22", "@skeldjs/core@^2.10.22":
+  version "2.10.22"
+  resolved "https://registry.yarnpkg.com/@skeldjs/core/-/core-2.10.22.tgz#5485477b6a3988c468e5e33313e97443b228fc5c"
+  integrity sha512-LC5FYutYd6cMsjz2w+uTucOmEEk+AH+Ktv62re0nsYJIPjSJf9Ty4n7BaNNQFQEZoBnzOQRes69obgixrj+0kg==
   dependencies:
-    "@skeldjs/constant" "2.10.19"
-    "@skeldjs/data" "2.10.19"
-    "@skeldjs/events" "2.10.19"
-    "@skeldjs/protocol" "2.10.19"
-    "@skeldjs/util" "2.10.19"
+    "@skeldjs/constant" "2.10.22"
+    "@skeldjs/data" "2.10.22"
+    "@skeldjs/events" "2.10.22"
+    "@skeldjs/protocol" "2.10.22"
+    "@skeldjs/util" "2.10.22"
 
-"@skeldjs/data@2.10.19":
-  version "2.10.19"
-  resolved "https://registry.yarnpkg.com/@skeldjs/data/-/data-2.10.19.tgz#2522c709a88560df4ba85977e022f79a1317e8d4"
-  integrity sha512-9iN5uE5jWKIT8Y0iyejIKZh5DLcWmkNqMTIfJERRbH4+r8FOC7h8GoLi9I/S/X+THaHZmTV4Wfskll4I76Yj6w==
+"@skeldjs/data@2.10.22":
+  version "2.10.22"
+  resolved "https://registry.yarnpkg.com/@skeldjs/data/-/data-2.10.22.tgz#8f0eaeff18379ea57a839ce33d8d393908ab6d62"
+  integrity sha512-lUv6iVgeszZyf1SLE4lBQsEB0uo6EBymXltgrYVMA7RmKxwVxTTnE8R9S5IpeBWNuMVX7dN3Ut9E++R/BiNS9w==
   dependencies:
-    "@skeldjs/constant" "2.10.19"
-    "@skeldjs/util" "2.10.19"
+    "@skeldjs/constant" "2.10.22"
+    "@skeldjs/util" "2.10.22"
 
-"@skeldjs/events@2.10.19":
-  version "2.10.19"
-  resolved "https://registry.yarnpkg.com/@skeldjs/events/-/events-2.10.19.tgz#43579e6ec2849b5ddff25683bc96f5e45f0ab179"
-  integrity sha512-bp+zIF5g6olr7d67sRK+wzHwWWCPdcldbhkGG5uI/OidoBCxSkv1LgMzVqTI12XMS4j61jt/a6qx15dtGq7mQQ==
+"@skeldjs/events@2.10.22":
+  version "2.10.22"
+  resolved "https://registry.yarnpkg.com/@skeldjs/events/-/events-2.10.22.tgz#9d39f3dd935a6d9123059f3fdba73c139a0e2aca"
+  integrity sha512-QvyRCQlYlV4ZWJUrY+nKarQtZLBBVsaiP0YVebxlAJpKPf4qU/gsXBHLGLfnsBhdhPPlcu5vvFyNUKRSmzj/jw==
 
-"@skeldjs/get-auth-token@^2.10.19":
-  version "2.10.19"
-  resolved "https://registry.yarnpkg.com/@skeldjs/get-auth-token/-/get-auth-token-2.10.19.tgz#8235eaff95744a4a6a67a6c7f6062e7860b3a526"
-  integrity sha512-WIlh5Sf7xFOlm+i89kCKy1fEny/kW2RlMZryahvfuHSfy3oM/lPrJ1KH0oUOp9HooN+r3g90nygza7Odq2FLpg==
+"@skeldjs/get-auth-token@^2.10.22":
+  version "2.10.22"
+  resolved "https://registry.yarnpkg.com/@skeldjs/get-auth-token/-/get-auth-token-2.10.22.tgz#8c767e6c6213435f9094f4bab4e4da15875ac119"
+  integrity sha512-P6B563PKP7dra1NAuNPwSHcwPdG5K9CUIbDg69KazmfvnjWtgntqm+eaqBGCC1zBCale21a35wvSicjtLlsvqQ==
   dependencies:
-    "@skeldjs/client" "2.10.19"
-    "@skeldjs/util" "2.10.19"
+    "@skeldjs/client" "2.10.22"
+    "@skeldjs/util" "2.10.22"
 
-"@skeldjs/protocol@2.10.19", "@skeldjs/protocol@^2.10.19":
-  version "2.10.19"
-  resolved "https://registry.yarnpkg.com/@skeldjs/protocol/-/protocol-2.10.19.tgz#26a16d7ce6e64632cba6b74071e2a56430211e1c"
-  integrity sha512-PKplhC7sukvOF3kNQJlpz9F9FeGM7md+TJDLFqA4dMliXNwGWmBWvPjkkaATDzIN0AKSJ7Xl8o04U4/liHqQ/A==
+"@skeldjs/protocol@2.10.22", "@skeldjs/protocol@^2.10.22":
+  version "2.10.22"
+  resolved "https://registry.yarnpkg.com/@skeldjs/protocol/-/protocol-2.10.22.tgz#f7112f288a4f4f42462b4c1d4e5d7cf834e7c764"
+  integrity sha512-s36aE1eXyKeW+zwMlcqXOZCZYovrEF9SH/RbkBIsknyf57YgKFzDt4jKHvC/y0BuIsO90c1DLKUaRt+f4yRWIg==
   dependencies:
-    "@skeldjs/constant" "2.10.19"
-    "@skeldjs/util" "2.10.19"
+    "@skeldjs/constant" "2.10.22"
+    "@skeldjs/util" "2.10.22"
 
-"@skeldjs/state@2.10.19":
-  version "2.10.19"
-  resolved "https://registry.yarnpkg.com/@skeldjs/state/-/state-2.10.19.tgz#af25c098c168417b1b8363be195c09de40508192"
-  integrity sha512-XYiYpP3sswbbClOIgzW42xPvPloWFp4r6fmUKrWmNhX05ijRJJpVsPWsLX7u3wxeiwqtTRg/Ldlx5zvuA3akcQ==
+"@skeldjs/state@2.10.22":
+  version "2.10.22"
+  resolved "https://registry.yarnpkg.com/@skeldjs/state/-/state-2.10.22.tgz#d3ae333ffcebc5e065db58ea8ed124fbf860f134"
+  integrity sha512-udKLib+hoM8vY0Zx45XQJEUtDOIGs0R6hJpF5n/D57JYYpwvFmZb4hu9+NQquWAdSYMDPF1oqV2oaO72/jnM+A==
   dependencies:
-    "@skeldjs/core" "2.10.19"
-    "@skeldjs/protocol" "2.10.19"
-    "@skeldjs/util" "2.10.19"
+    "@skeldjs/core" "2.10.22"
+    "@skeldjs/protocol" "2.10.22"
+    "@skeldjs/util" "2.10.22"
 
-"@skeldjs/text@^2.10.19":
-  version "2.10.19"
-  resolved "https://registry.yarnpkg.com/@skeldjs/text/-/text-2.10.19.tgz#055a0b12070f46bf33ac229adaab0e5b8e2555a9"
-  integrity sha512-zeCuNR1tY4X8Zo0Yt3gk2l1BcHRBaUmiihYZReAicAP5nQu8tXJfua/jmtWDbwUfxIzCyUggOR46672K2b4IUA==
+"@skeldjs/text@^2.10.22":
+  version "2.10.22"
+  resolved "https://registry.yarnpkg.com/@skeldjs/text/-/text-2.10.22.tgz#377faa34d2b18c251277f79289bf35b78c19bea0"
+  integrity sha512-rZnVQIlutKjP1QxyLSHUREtbi6Fi5H1WGk0/seqfk/1ZxVC1h5g/JQ7I8+FUmGN5leUdJSE+ZPPUfB5jCQ1mIQ==
 
-"@skeldjs/util@2.10.19", "@skeldjs/util@^2.10.19":
-  version "2.10.19"
-  resolved "https://registry.yarnpkg.com/@skeldjs/util/-/util-2.10.19.tgz#61aabfeb3f46f6942b02357b31ae299c9480a7b8"
-  integrity sha512-qXfgQqKikvll8hNujpKLRZas6n5Kj8zP8LurMUmmfAhd9J0Ka1a3zqDl9Q5QVxwivifiurHAYDzi0gqNi45bCA==
+"@skeldjs/util@2.10.22", "@skeldjs/util@^2.10.22":
+  version "2.10.22"
+  resolved "https://registry.yarnpkg.com/@skeldjs/util/-/util-2.10.22.tgz#e5e0b25b4c6134b8b305b7dd0cb857d2c2960668"
+  integrity sha512-jQ4I+NHDPrEps8nIZ/TJfViyp2TYU1FE1BYTFXPQFKoUcXndl4fz9YpMr0Vzy4/rVsbYdIJlsZUMHzDOKtSdew==
 
 "@types/body-parser@*":
   version "1.19.0"

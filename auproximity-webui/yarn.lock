@@ -1024,17 +1024,25 @@
     "@sentry/types" "6.8.0"
     tslib "^1.9.3"
 
-"@skeldjs/constant@^2.6.18":
-  version "2.10.15"
-  resolved "https://registry.yarnpkg.com/@skeldjs/constant/-/constant-2.10.15.tgz#0f860747783005f67f366c7a83f8d2d5417b52bc"
-  integrity sha512-FN8Tv3VZOiWiKyM4kiV+6XawzDysIsezBpz3SPtrNqqZd3LK5k8eAz+sHeVgUfgu8KIEa2dnVnpqk8ISq13t/w==
+"@skeldjs/constant@2.10.22", "@skeldjs/constant@^2.10.22":
+  version "2.10.22"
+  resolved "https://registry.yarnpkg.com/@skeldjs/constant/-/constant-2.10.22.tgz#57f88131fc1973fcc5e85948575e03cb86373c8d"
+  integrity sha512-KQ/a27aeBRsx+ZX5ya99RaoRX2AxKXXTVCmZE7nz6AsWpTZ2wblNr2QtX1wFQWycDhOgB5Osi3RXeskMyrIR8g==
   dependencies:
-    "@skeldjs/util" "2.10.15"
+    "@skeldjs/util" "2.10.22"
 
-"@skeldjs/util@2.10.15", "@skeldjs/util@^2.5.2":
-  version "2.10.15"
-  resolved "https://registry.yarnpkg.com/@skeldjs/util/-/util-2.10.15.tgz#d6213ad24d40b358913bc4bd6de7f36b4a88265e"
-  integrity sha512-JpQeePukxw6QTZTCPJs2dtuSQvWhRWxK5hzchYAKNVWTcvFXDdSf0eAbRVZzDE+KMDtnIPwYj/4pZzKx1Nlytg==
+"@skeldjs/data@^2.10.22":
+  version "2.10.22"
+  resolved "https://registry.yarnpkg.com/@skeldjs/data/-/data-2.10.22.tgz#8f0eaeff18379ea57a839ce33d8d393908ab6d62"
+  integrity sha512-lUv6iVgeszZyf1SLE4lBQsEB0uo6EBymXltgrYVMA7RmKxwVxTTnE8R9S5IpeBWNuMVX7dN3Ut9E++R/BiNS9w==
+  dependencies:
+    "@skeldjs/constant" "2.10.22"
+    "@skeldjs/util" "2.10.22"
+
+"@skeldjs/util@2.10.22", "@skeldjs/util@^2.10.22":
+  version "2.10.22"
+  resolved "https://registry.yarnpkg.com/@skeldjs/util/-/util-2.10.22.tgz#e5e0b25b4c6134b8b305b7dd0cb857d2c2960668"
+  integrity sha512-jQ4I+NHDPrEps8nIZ/TJfViyp2TYU1FE1BYTFXPQFKoUcXndl4fz9YpMr0Vzy4/rVsbYdIJlsZUMHzDOKtSdew==
 
 "@soda/friendly-errors-webpack-plugin@^1.7.1":
   version "1.8.0"
