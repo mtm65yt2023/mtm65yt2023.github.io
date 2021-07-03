@@ -28,7 +28,7 @@
 					outlined
 				></v-select>
 				<v-text-field
-					v-if="backendType === 2 || backendType === 4"
+					v-if="backendType === 2 || backendType === 3"
 					v-model="ip"
 					label="Domain name (example.com) or IP Address of the server"
 					:rules="[rules.required]"
@@ -69,7 +69,7 @@ import { Component, Vue } from "vue-property-decorator";
 import {
 	BackendModel,
 	BackendType,
-	ImpostorBackendModel,
+	CustomServerBackendModel,
 	PublicLobbyBackendModel,
 	PublicLobbyRegion,
 } from "@/models/BackendModel";
@@ -102,6 +102,10 @@ export default class ServerConnector extends Vue {
 		{
 			backendName: "Impostor Private Server",
 			backendType: BackendType.Impostor,
+		},
+		{
+			backendName: "Custom Server",
+			backendType: BackendType.CustomServer,
 		},
 	];
 
@@ -156,7 +160,9 @@ export default class ServerConnector extends Vue {
 		if (this.backendType === BackendType.PublicLobby) {
 			(backendModel as PublicLobbyBackendModel).region = this.publicLobbyRegion;
 		} else if (this.backendType === BackendType.Impostor) {
-			(backendModel as ImpostorBackendModel).ip = this.ip;
+			(backendModel as CustomServerBackendModel).ip = this.ip;
+		} else if (this.backendType === BackendType.CustomServer) {
+			(backendModel as CustomServerBackendModel).ip = this.ip;
 		}
 		this.$emit("joinroom", {
 			name,
@@ -175,7 +181,10 @@ export default class ServerConnector extends Vue {
 	}
 
 	get shareSlug() {
-		if (this.backendType === BackendType.Impostor) {
+		if (
+			this.backendType === BackendType.Impostor ||
+			this.backendType === BackendType.CustomServer
+		) {
 			return (
 				location.origin +
 				"/" +
