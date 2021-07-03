@@ -39,6 +39,8 @@ export default class CustomServerBackend extends BackendAdapter {
 		this.eventEmitter = new EventEmitter();
 		this.backendModel = backendModel;
 		this.gameID = this.backendModel.gameCode;
+
+		this.recordedPlayers = new Map();
 	}
 
 	getOrCreatePlayer(clientId: number): RecordedPlayer {
@@ -69,17 +71,17 @@ export default class CustomServerBackend extends BackendAdapter {
 
 		const consoleClr: ch.Chalk = skeldjs.ColorCodes[
 			colour as keyof typeof skeldjs.ColorCodes
-		]?.hex
-			? chalk.hex(skeldjs.ColorCodes[colour]?.hex)
+		]?.highlightHex
+			? chalk.hex(skeldjs.ColorCodes[colour].highlightHex)
 			: chalk.gray;
 
 		return consoleClr(name) + " " + chalk.grey("(" + id + ")");
 	}
 
 	initialize(): void {
-		this.socket = new ws(this.backendModel.ip, {
-			port: CUSTOM_SERVER_PORT,
-		});
+		this.socket = new ws(
+			"ws://" + this.backendModel.ip + ":" + CUSTOM_SERVER_PORT
+		);
 
 		this.socket.on("open", () => {
 			this.socket?.send(
@@ -133,7 +135,7 @@ export default class CustomServerBackend extends BackendAdapter {
 			this.destroy();
 		});
 
-		this.eventEmitter.on(TransportOp.Destroyed, () => {
+		this.eventEmitter.on(TransportOp.Destroy, () => {
 			this.log(LogMode.Info, "The server destroyed the room.");
 			this.destroy();
 		});
@@ -163,14 +165,14 @@ export default class CustomServerBackend extends BackendAdapter {
 		this.eventEmitter.on(TransportOp.PlayerUpdate, (data) => {
 			const player = this.getOrCreatePlayer(data.clientId);
 
-			if ("color" in data) {
-				player.color = data.color;
-				this.emitPlayerColor(data.clientId, player.color);
-			}
-
 			if ("name" in data) {
 				player.name = data.name;
 				this.emitPlayerName(data.clientId, player.name);
+			}
+
+			if ("color" in data) {
+				player.color = data.color;
+				this.emitPlayerColor(data.clientId, player.color);
 			}
 
 			if ("hat" in data) {
@@ -200,8 +202,10 @@ export default class CustomServerBackend extends BackendAdapter {
 			this.emitGameState(GameState.Meeting);
 		});
 
-		this.eventEmitter.on(TransportOp.MeetingEnd, () => {
-			// todo: set ejected player flag isDead
+		this.eventEmitter.on(TransportOp.MeetingEnd, (data) => {
+			if (data.ejectedClientId)
+				this.emitPlayerFlags(data.ejectedClientId, PlayerFlag.IsDead, true);
+
 			this.emitGameState(GameState.Game);
 		});
 
@@ -210,7 +214,9 @@ export default class CustomServerBackend extends BackendAdapter {
 		});
 
 		this.eventEmitter.on(TransportOp.ImpostorsUpdate, (data) => {
-			// todo: reset current impostors
+			for (const [clientId] of this.recordedPlayers) {
+				this.emitPlayerFlags(clientId, PlayerFlag.IsImpostor, false);
+			}
 			for (const clientId of data.clientIds) {
 				this.emitPlayerFlags(clientId, PlayerFlag.IsImpostor, true);
 			}
@@ -243,7 +249,6 @@ export default class CustomServerBackend extends BackendAdapter {
 
 	destroy(): void {
 		this.socket?.close();
-		return;
 	}
 }
 
@@ -255,7 +260,7 @@ export enum IdentifyError {
 export enum TransportOp {
 	Hello = "HELLO",
 	Error = "ERROR",
-	Destroyed = "DESTROYED",
+	Destroy = "DESTROY",
 	HostUpdate = "HOST_UPDATE",
 	PlayerMove = "PLAYER_MOVE",
 	PlayerUpdate = "PLAYER_UPDATE",
