@@ -18,6 +18,7 @@ import { GameSettings } from "../types/models/ClientOptions";
 import { MatchmakerServers } from "../types/constants/MatchmakerServers";
 import { GameState } from "../types/enums/GameState";
 import { GameFlag } from "../types/enums/GameFlags";
+import { getVentName } from "../util/getVentName";
 
 // ~~Using integer for now, version parsing isn't working on SkeldJS with 2020.3.5.0 for some reason.~~
 // I'm keeping this comment here because it shows how stupid I am that it is in fact 2021 and not 2020.
@@ -103,23 +104,7 @@ export default class PublicLobbyBackend extends BackendAdapter {
 	getVentName(ventid: number): string | null {
 		if (!this.client) return null;
 
-		const map = this.client.settings.map;
-		const data = skeldjs.MapVentData[map][ventid];
-
-		if (!data) return null;
-
-		switch (map) {
-			case skeldjs.GameMap.TheSkeld:
-				return skeldjs.TheSkeldVent[data.id];
-			case skeldjs.GameMap.MiraHQ:
-				return skeldjs.MiraHQVent[data.id];
-			case skeldjs.GameMap.Polus:
-				return skeldjs.PolusVent[data.id];
-			case skeldjs.GameMap.Airship:
-				return skeldjs.AirshipVent[data.id];
-		}
-
-		return null;
+		return getVentName(this.client.settings.map, ventid);
 	}
 
 	async doJoin(max_attempts = 5, attempt = 0): Promise<boolean> {
@@ -785,24 +770,32 @@ export default class PublicLobbyBackend extends BackendAdapter {
 
 			this.client.on("security.cameras.join", (ev) => {
 				if (ev.player?.info) {
-					this.log(LogMode.Info, fmtName(ev.player), "went onto cameras.");
+					this.log(
+						LogMode.Info,
+						fmtName(ev.player),
+						"started looking at cameras."
+					);
 					this.emitPlayerFlags(ev.player.id, PlayerFlag.OnCams, true);
 				} else {
 					this.log(
 						LogMode.Warn,
-						"Someone went onto cameras, but there was no data."
+						"Someone started looking at cameras, but there was no data."
 					);
 				}
 			});
 
 			this.client.on("security.cameras.leave", (ev) => {
 				if (ev.player?.info) {
-					this.log(LogMode.Info, fmtName(ev.player), "went off cameras.");
+					this.log(
+						LogMode.Info,
+						fmtName(ev.player),
+						"stopped looking at cameras."
+					);
 					this.emitPlayerFlags(ev.player.id, PlayerFlag.OnCams, false);
 				} else {
 					this.log(
 						LogMode.Warn,
-						"Someone went off cameras, but there was no data."
+						"Someone stopped looking at cameras, but there was no data."
 					);
 				}
 			});

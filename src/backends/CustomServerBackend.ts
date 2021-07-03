@@ -1,5 +1,6 @@
 import EventEmitter from "events";
 import ch from "chalk";
+import util from "util";
 import ws from "ws";
 
 import * as skeldjs from "@skeldjs/core";
@@ -11,6 +12,10 @@ import { BackendAdapter, LogMode } from "./Backend";
 import { GameState } from "../types/enums/GameState";
 import { PlayerFlag } from "../types/enums/PlayerFlags";
 import { GameFlag } from "../types/enums/GameFlags";
+import logger from "../util/logger";
+import { GameSettings } from "../types/models/ClientOptions";
+import { getVentName } from "../util/getVentName";
+import { GameMap } from "@skeldjs/core";
 
 const chalk = new ch.Instance({ level: 2 });
 
@@ -31,6 +36,8 @@ export default class CustomServerBackend extends BackendAdapter {
 
 	recordedPlayers: Map<number, RecordedPlayer>;
 
+	settings: GameSettings;
+
 	constructor(backendModel: CustomServerBackendModel) {
 		super();
 
@@ -41,6 +48,22 @@ export default class CustomServerBackend extends BackendAdapter {
 		this.gameID = this.backendModel.gameCode;
 
 		this.recordedPlayers = new Map();
+
+		this.settings = {
+			map: GameMap.TheSkeld,
+			crewmateVision: 1,
+		};
+	}
+
+	log(mode: LogMode, format: string, ...params: unknown[]): void {
+		const formatted = util.format(format, ...params);
+
+		logger[mode](
+			chalk.grey(
+				"[" + this.backendModel.gameCode + "@" + this.backendModel.ip + "]"
+			),
+			formatted
+		);
 	}
 
 	getOrCreatePlayer(clientId: number): RecordedPlayer {
@@ -78,12 +101,21 @@ export default class CustomServerBackend extends BackendAdapter {
 		return consoleClr(name) + " " + chalk.grey("(" + id + ")");
 	}
 
+	getVentName(ventid: number): string | null {
+		return getVentName(this.settings.map, ventid);
+	}
+
 	initialize(): void {
+		this.log(
+			LogMode.Info,
+			"Connecting to " + this.backendModel.ip + ":" + CUSTOM_SERVER_PORT + ".."
+		);
 		this.socket = new ws(
 			"ws://" + this.backendModel.ip + ":" + CUSTOM_SERVER_PORT
 		);
 
 		this.socket.on("open", () => {
+			this.log(LogMode.Info, "Socket open.");
 			this.socket?.send(
 				JSON.stringify({
 					op: TransportOp.Hello,
@@ -154,8 +186,10 @@ export default class CustomServerBackend extends BackendAdapter {
 			if (process.env.NODE_ENV !== "production") {
 				this.log(
 					LogMode.Info,
+					"%s moved to X: %s, Y: %s",
 					this.fmtPlayer(data.clientId),
-					"moved to X: " + data.x + ", Y: " + data.y
+					data.x,
+					data.y
 				);
 			}
 
@@ -167,11 +201,24 @@ export default class CustomServerBackend extends BackendAdapter {
 
 			if ("name" in data) {
 				player.name = data.name;
+				this.log(
+					LogMode.Info,
+					"%s set their name to %s",
+					this.fmtPlayer(data.clientId),
+					player.name
+				);
 				this.emitPlayerName(data.clientId, player.name);
 			}
 
 			if ("color" in data) {
 				player.color = data.color;
+				this.log(
+					LogMode.Info,
+					"%s set their name to %s",
+					this.fmtPlayer(data.clientId),
+					skeldjs.Color[player.color]
+				);
+
 				this.emitPlayerColor(data.clientId, player.color);
 			}
 
@@ -187,29 +234,56 @@ export default class CustomServerBackend extends BackendAdapter {
 		});
 
 		this.eventEmitter.on(TransportOp.SettingsUpdate, (data) => {
+			if ("map" in data || "crewmateVision" in data) {
+				if ("map" in data) {
+					this.settings.map = data.map;
+					this.log(LogMode.Info, "Map set to " + skeldjs.GameMap[data.map]);
+				}
+				if ("crewmateVision" in data) {
+					this.settings.crewmateVision = data.crewmateVision;
+					this.log(
+						LogMode.Info,
+						"Crewmate vision set to " + data.crewmateVision
+					);
+				}
+			}
 			this.emitSettingsUpdate(data);
 		});
 
 		this.eventEmitter.on(TransportOp.GameStart, () => {
+			this.log(LogMode.Info, "Game started.");
 			this.emitGameState(GameState.Game);
 		});
 
 		this.eventEmitter.on(TransportOp.GameEnd, () => {
+			this.log(LogMode.Info, "Game ended.");
 			this.emitGameState(GameState.Lobby);
 		});
 
 		this.eventEmitter.on(TransportOp.MeetingStart, () => {
+			this.log(LogMode.Info, "Meeting started.");
 			this.emitGameState(GameState.Meeting);
 		});
 
 		this.eventEmitter.on(TransportOp.MeetingEnd, (data) => {
-			if (data.ejectedClientId)
+			this.log(LogMode.Info, "Meeting ended");
+			if (data.ejectedClientId) {
 				this.emitPlayerFlags(data.ejectedClientId, PlayerFlag.IsDead, true);
+				this.log(
+					LogMode.Info,
+					"%s was voted off.",
+					this.fmtPlayer(data.ejectedClientId)
+				);
+			} else {
+				this.log(LogMode.Info, "No one was voted off.");
+			}
 
 			this.emitGameState(GameState.Game);
 		});
 
 		this.eventEmitter.on(TransportOp.PlayerKill, (data) => {
+			const player = this.getOrCreatePlayer(data.clientId);
+			this.log(LogMode.Info, "%s was murdered.", player);
 			this.emitPlayerFlags(data.clientId, PlayerFlag.IsDead, true);
 		});
 
@@ -218,31 +292,56 @@ export default class CustomServerBackend extends BackendAdapter {
 				this.emitPlayerFlags(clientId, PlayerFlag.IsImpostor, false);
 			}
 			for (const clientId of data.clientIds) {
+				this.log(
+					LogMode.Info,
+					"%s was made impostor.",
+					this.fmtPlayer(clientId)
+				);
 				this.emitPlayerFlags(clientId, PlayerFlag.IsImpostor, true);
 			}
 		});
 
 		this.eventEmitter.on(TransportOp.CamsPlayerJoin, (data) => {
+			this.log(
+				LogMode.Info,
+				"%s started looking at cameras.",
+				this.fmtPlayer(data.clientId)
+			);
 			this.emitPlayerFlags(data.clientId, PlayerFlag.OnCams, true);
 		});
 
 		this.eventEmitter.on(TransportOp.CamsPlayerLeave, (data) => {
+			this.log(
+				LogMode.Info,
+				"%s stopped looking at cameras.",
+				this.fmtPlayer(data.clientId)
+			);
 			this.emitPlayerFlags(data.clientId, PlayerFlag.OnCams, false);
 		});
 
 		this.eventEmitter.on(TransportOp.CommsSabotage, () => {
+			this.log(LogMode.Info, "Someone sabotaged communications.");
 			this.emitGameFlags(GameFlag.CommsSabotaged, true);
 		});
 
 		this.eventEmitter.on(TransportOp.CommsRepair, () => {
+			this.log(LogMode.Info, "Someone repaired communications.");
 			this.emitGameFlags(GameFlag.CommsSabotaged, false);
 		});
 
 		this.eventEmitter.on(TransportOp.PlayerVentEnter, (data) => {
+			this.log(
+				LogMode.Log,
+				"%s entered vent %s.",
+				this.fmtPlayer(data.clientId),
+				this.getVentName(data.ventId)
+			);
 			this.emitPlayerVent(data.clientId, data.ventId);
 		});
 
 		this.eventEmitter.on(TransportOp.PlayerVentExit, (data) => {
+			const player = this.getOrCreatePlayer(data.clientId);
+			this.log(LogMode.Log, "%s exited a vent.", player);
 			this.emitPlayerVent(data.clientId, -1);
 		});
 	}
