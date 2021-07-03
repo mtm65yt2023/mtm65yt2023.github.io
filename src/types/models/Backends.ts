@@ -18,6 +18,6 @@ export interface PublicLobbyBackendModel extends BackendModel {
 }
 
 export interface CustomServerBackendModel extends BackendModel {
-	backendType: BackendType.Impostor;
+	backendType: BackendType.Impostor | BackendType.CustomServer;
 	ip: string;
 }

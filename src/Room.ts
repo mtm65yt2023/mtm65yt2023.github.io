@@ -14,8 +14,9 @@ import {
 import { BackendAdapter } from "./backends/Backend";
 
 import ImpostorBackend from "./backends/ImpostorBackend";
-import NoOpBackend from "./backends/NoOpBackend";
+import CustomServerBackend from "./backends/CustomServerBackend";
 import PublicLobbyBackend from "./backends/PublicLobbyBackend";
+import NoOpBackend from "./backends/NoOpBackend";
 
 import Client, { PlayerModel, PlayerPose } from "./Client";
 import { PlayerFlag } from "./types/enums/PlayerFlags";
@@ -72,6 +73,8 @@ export default class Room {
 	): BackendAdapter {
 		if (backendModel.backendType === BackendType.PublicLobby) {
 			return new PublicLobbyBackend(backendModel as PublicLobbyBackendModel);
+		} else if (backendModel.backendType === BackendType.CustomServer) {
+			return new CustomServerBackend(backendModel as CustomServerBackendModel);
 		} else if (backendModel.backendType === BackendType.Impostor) {
 			return new ImpostorBackend(backendModel as CustomServerBackendModel);
 		} else {

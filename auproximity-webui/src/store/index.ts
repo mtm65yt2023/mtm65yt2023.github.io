@@ -148,8 +148,8 @@ export default new Vuex.Store({
 			state.me.name = payload.name;
 			state.backendModel = payload.backendModel;
 		},
-		setHost(state: State, payload: { name: string }) {
-			state.host = payload.name;
+		setHost(state: State, payload: { uuid: string }) {
+			state.host = payload.uuid;
 		},
 		setOptions(state: State, payload: { options: HostOptions }) {
 			state.options = payload.options;
@@ -273,9 +273,9 @@ export default new Vuex.Store({
 		},
 		[`socket_${ClientSocketEvents.SetHost}`](
 			{ commit },
-			payload: { name: string }
+			payload: { uuid: string }
 		) {
-			commit("setHost", { name: payload.name });
+			commit("setHost", { uuid: payload.uuid });
 		},
 		[`socket_${ClientSocketEvents.SetOptions}`](
 			{ commit },

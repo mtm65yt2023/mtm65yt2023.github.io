@@ -123,13 +123,20 @@ export default class Client implements ClientBase {
 			return;
 		}
 
-		// TODO: make this just a deepEqual on backendModel
 		let room = state.allRooms.find((room) => {
 			if (room.backendModel.gameCode !== backendModel.gameCode) return false;
 
 			if (
 				room.backendModel.backendType === BackendType.Impostor &&
 				backendModel.backendType === BackendType.Impostor
+			) {
+				return (
+					(room.backendModel as CustomServerBackendModel).ip ===
+					(backendModel as CustomServerBackendModel).ip
+				);
+			} else if (
+				room.backendModel.backendType === BackendType.CustomServer &&
+				backendModel.backendType === BackendType.CustomServer
 			) {
 				return (
 					(room.backendModel as CustomServerBackendModel).ip ===
