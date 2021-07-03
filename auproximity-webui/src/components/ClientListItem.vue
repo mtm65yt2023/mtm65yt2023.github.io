@@ -1,10 +1,8 @@
 <template>
 	<v-list-group>
 		<template v-slot:activator>
-			<v-list-item-icon
-				:color="client.color > -1 ? Colors[client.color] : undefined"
-			>
-				<i class="fas fa-user"></i>
+			<v-list-item-icon>
+				<v-icon :color="hexColor">fa-user</v-icon>
 			</v-list-item-icon>
 			<v-list-item-content>
 				<v-list-item-title>
@@ -67,8 +65,10 @@
 
 <script lang="ts">
 import { Component, Vue, Prop } from "vue-property-decorator";
-import { ClientModel, RemoteStreamModel, ColorID } from "@/models/ClientModel";
+import { ClientModel, RemoteStreamModel } from "@/models/ClientModel";
 import { ClientSocketEvents } from "@/models/ClientSocketEvents";
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { ColorCodes } from "@skeldjs/data";
 
 @Component({})
 export default class ClientListItem extends Vue {
@@ -77,21 +77,6 @@ export default class ClientListItem extends Vue {
 
 	@Prop()
 	streams!: RemoteStreamModel[];
-
-	Colors = {
-		[ColorID.Red]: "#7a0838",
-		[ColorID.Blue]: "#09158e",
-		[ColorID.DarkGreen]: "#0a4d2e",
-		[ColorID.Pink]: "#ac2bae",
-		[ColorID.Orange]: "#b43e15",
-		[ColorID.Yellow]: "#c38822",
-		[ColorID.Black]: "#1e1f26",
-		[ColorID.White]: "#8495c0",
-		[ColorID.Purple]: "#3b177c",
-		[ColorID.Brown]: "#5e2615",
-		[ColorID.Cyan]: "#24a9bf",
-		[ColorID.Lime]: "#15a842",
-	};
 
 	removeClient(ban: boolean) {
 		this.$socket.client.emit(ClientSocketEvents.RemoveClient, {
@@ -118,6 +103,15 @@ export default class ClientListItem extends Vue {
 			);
 			this.$forceUpdate();
 		}
+	}
+
+	get hexColor() {
+		return (
+			"#" +
+			(ColorCodes[this.client.color]
+				? ColorCodes[this.client.color].highlightHex
+				: "ffffff")
+		);
 	}
 
 	get stream() {
