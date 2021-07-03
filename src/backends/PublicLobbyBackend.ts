@@ -33,14 +33,14 @@ function fmtName(
 
 	const info = gamedata || player.info;
 
-	const colour = info ? info.color : skeldjs.Color.Grey;
+	const colour = info ? info.color : skeldjs.Color.Gray;
 	const name = info ? info.name || "<No Name>" : "<No Data>";
 	const id = player.id || "<No ID>";
 
 	const consoleClr: ch.Chalk = skeldjs.ColorCodes[
 		colour as keyof typeof skeldjs.ColorCodes
-	]?.hex
-		? chalk.hex(skeldjs.ColorCodes[colour]?.hex)
+	]?.highlightHex
+		? chalk.hex(skeldjs.ColorCodes[colour].highlightHex)
 		: chalk.gray;
 
 	return consoleClr(name) + " " + chalk.grey("(" + id + ")");
