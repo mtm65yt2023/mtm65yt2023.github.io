@@ -1,10 +1,8 @@
 import util from "util";
 import dns from "dns";
 import ch from "chalk";
-import path from "path";
 
 import * as skeldjs from "@skeldjs/client";
-import { authTokenHook } from "@skeldjs/get-auth-token";
 import * as protocol from "@skeldjs/protocol";
 
 import logger from "../util/logger";
@@ -125,21 +123,6 @@ export default class PublicLobbyBackend extends BackendAdapter {
 			this.client = new skeldjs.SkeldjsClient(GAME_VERSION, {
 				allowHost: false,
 			});
-
-			const ver = process.platform === "win32" ? "win-x64" : "linux-x64";
-
-			const pathToGetAuthToken = path.resolve(
-				process.cwd(),
-				"./GetAuthToken/hazeltest/GetAuthToken/bin/Release/net50/" +
-					ver +
-					"/GetAuthToken"
-			);
-
-			authTokenHook(this.client, {
-				exe_path: pathToGetAuthToken,
-				cert_path: path.resolve(process.cwd(), "./PubsCert.pem"),
-				attempts: 5,
-			});
 		}
 
 		if (!this.players_cache || !this.components_cache || !this.global_cache) {
@@ -221,7 +204,7 @@ export default class PublicLobbyBackend extends BackendAdapter {
 		);
 
 		try {
-			await this.client.connect(ip, undefined, undefined, port);
+			await this.client.connect(ip, undefined, port);
 			await this.client.identify("Roundcar", this.client.token);
 		} catch (e) {
 			const err = e as Error;
@@ -896,7 +879,7 @@ export default class PublicLobbyBackend extends BackendAdapter {
 			port
 		);
 		try {
-			await this.client.connect(ip, undefined, undefined, port);
+			await this.client.connect(ip, undefined, port);
 			if (!this.client) return ConnectionErrorCode.NoClient;
 			await Promise.race([
 				this.client.identify("auproxy", this.client.token),
